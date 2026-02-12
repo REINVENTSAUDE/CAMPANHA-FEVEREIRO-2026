@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Campanha de Vendas</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <!-- TOPO COM FOTO (apenas no topo) -->
+  <header class="hero" role="banner">
+    <div class="hero__overlay"></div>
+
+    <div class="hero__content">
+      <div class="hero__title">CAMPANHA DE VENDAS</div>
+    </div>
+  </header>
+
+  <!-- FAIXA PRÊMIOS (ticker) -->
+  <section class="ticker" aria-label="Prêmios da campanha">
+    <div class="ticker__label">PRÊMIOS</div>
+    <div class="ticker__track" id="prizeTrack"></div>
+  </section>
+
+  <!-- BARRA DE DADO (fixa, abaixo do topo) -->
+  <section class="dicebar" aria-label="Pontuação do dado">
+    <div class="dicebar__title">PONTOS DO DADO</div>
+    <div class="dicebar__items">
+      <div class="dicechip"><span class="face">1</span><span class="pts">11</span></div>
+      <div class="dicechip"><span class="face">2</span><span class="pts">10</span></div>
+      <div class="dicechip"><span class="face">3</span><span class="pts">9</span></div>
+      <div class="dicechip"><span class="face">4</span><span class="pts">8</span></div>
+      <div class="dicechip"><span class="face">5</span><span class="pts">7</span></div>
+      <div class="dicechip"><span class="face">6</span><span class="pts">6</span></div>
+    </div>
+    <div class="dicebar__legend">
+      <span class="legend legend--pink">Pendente</span>
+      <span class="legend legend--blue">Registrado</span>
+    </div>
+  </section>
+
+  <!-- CONTROLES -->
+  <section class="controls" aria-label="Controles">
+    <div class="controls__left">
+      <button class="btn btn--primary" id="btnModeChamp">Campeonato</button>
+      <button class="btn" id="btnModeSheet">Planilha</button>
+    </div>
+
+    <div class="controls__right">
+      <button class="btn" id="btnPrev">◀</button>
+      <div class="status" id="statusPage">Página 1/1</div>
+      <button class="btn" id="btnNext">▶</button>
+
+      <button class="btn btn--glow" id="btnPause">⏸ Pausar</button>
+      <div class="status status--small" id="statusAuto">Auto: 10s</div>
+    </div>
+  </section>
+
+  <!-- CONTEÚDO -->
+  <main class="main">
+    <!-- MODO CAMPEONATO -->
+    <section id="viewChamp" class="view view--active" aria-label="Ranking campeonato">
+      <div class="tableHead">
+        <div>Pos</div>
+        <div>Vendedor</div>
+        <div class="right">Pontos</div>
+      </div>
+      <div id="champList" class="list"></div>
+    </section>
+
+    <!-- MODO PLANILHA -->
+    <section id="viewSheet" class="view" aria-label="Tabela planilha">
+      <div class="sheetTop">
+        <div class="sheetTop__left">
+          <div class="sheetTitle">Controle (Vidas e Giros)</div>
+          <div class="sheetHint">Rosa = pendente / Azul = giro registrado</div>
+        </div>
+
+        <div class="sheetTop__right">
+          <button class="btn" id="btnGiroPrev">Giros ◀</button>
+          <div class="status" id="statusGiro">Giros: 1–10</div>
+          <button class="btn" id="btnGiroNext">▶</button>
+        </div>
+      </div>
+
+      <div class="sheetWrap">
+        <table class="sheet" id="sheetTable"></table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__left" id="statusLastUpdate">Carregando dados…</div>
+    <div class="footer__right">Arquivo: <strong>DADOS-CAMPANHA.csv</strong></div>
+  </footer>
+
+  <script src="./script.js"></script>
+</body>
+</html>
