@@ -34,6 +34,14 @@ body{
   background-position: center;
   border-bottom: 1px solid var(--line);
 }
+.hero::after{
+  content:"";
+  position:absolute;
+  left:0; right:0;
+  bottom:-1px;
+  height:3px;
+  background: rgba(11,15,30,1);
+}
 .hero__overlay{
   position:absolute; inset:0;
   background:
@@ -62,9 +70,9 @@ body{
 
 /* Ticker */
 .ticker{
-  margin-top: -1px;                 /* cola no hero */
-  border-top: 0;                    /* garante que não cria linha */
-  background: rgba(11,15,30,.92);   /* casa com o final do degradê */
+  margin-top: -2px;                 /* cola no hero */
+  border-top: 0; !important;                   /* garante que não cria linha */
+  background: rgba(11,15,30,1); !important;  /* casa com o final do degradê */
   display:flex;
   align-items:center;
   gap: 14px;
@@ -365,6 +373,7 @@ body{
 }
 .footer__left{ color: var(--muted); font-weight: 800; }
 .footer__right{ color: var(--muted); font-weight: 800; }
+
 
 
 
