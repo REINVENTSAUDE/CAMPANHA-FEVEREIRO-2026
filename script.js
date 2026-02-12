@@ -8,11 +8,11 @@ const PAGE_SIZE = 10;
 
 // D:AN = 36 colunas de giro (D até AN)
 const GIRO_WINDOW = 10;   // quantas colunas de giro por vez na TV
-const GIRO_START_INDEX_EXCEL = 3;   // D = índice 3 (A=0,B=1,C=2,D=3)
-const GIRO_END_INDEX_EXCEL = 39;    // AN = índice 39
-const TOTAL_INDEX_EXCEL = 40;       // AO = índice 40
-const NAME_INDEX_EXCEL = 1;         // B = índice 1
-const VIDAS_INDEX_EXCEL = 2;        // C = índice 2
+const GIRO_START_INDEX_EXCEL = 2;   // D = índice 3 (A=0,B=1,C=2,D=3)
+const GIRO_END_INDEX_EXCEL = 38;    // AN = índice 39
+const TOTAL_INDEX_EXCEL = 39;       // AO = índice 40
+const NAME_INDEX_EXCEL = 0;         // B = índice 1
+const VIDAS_INDEX_EXCEL = 1;        // C = índice 2
 
 // prêmios (texto direto)
 const PRIZES = [
@@ -434,3 +434,4 @@ window.addEventListener("keydown", (e) => {
     console.error(err);
   }
 })();
+
