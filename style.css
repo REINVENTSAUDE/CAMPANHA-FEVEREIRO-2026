@@ -37,7 +37,7 @@ body{
 .hero__overlay{
   position:absolute; inset:0;
   background:
-    linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(11,15,30,.92) 85%, rgba(11,15,30,1) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(11,15,30,.95) 78%, rgba(11,15,30,1) 100%),
     radial-gradient(circle at 20% 30%, rgba(0,191,255,.18), transparent 55%),
     radial-gradient(circle at 80% 50%, rgba(123,47,247,.14), transparent 60%);
 }
@@ -365,6 +365,7 @@ body{
 }
 .footer__left{ color: var(--muted); font-weight: 800; }
 .footer__right{ color: var(--muted); font-weight: 800; }
+
 
 
 
