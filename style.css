@@ -29,7 +29,7 @@ body{
   position: relative;
   height: 22vh;
   min-height: 160px;
-  background-image: url("./topo-premios.jpg");
+  background-image: url("./topo-premios.jpeg");
   background-size: cover;
   background-position: center;
   border-bottom: 1px solid var(--line);
@@ -356,3 +356,4 @@ body{
 }
 .footer__left{ color: var(--muted); font-weight: 800; }
 .footer__right{ color: var(--muted); font-weight: 800; }
+
