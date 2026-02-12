@@ -94,13 +94,20 @@ body{
   letter-spacing: .05em;
   text-transform: uppercase;
   font-size: 18px;
-  padding: 2px 10px;
+
+  padding: 6px 18px;          /* mais respiro interno */
   border-radius: 999px;
   background: rgba(0,0,0,.20);
   border: 1px solid rgba(255,255,255,.10);
   text-shadow: 0 0 10px rgba(0,191,255,.22);
+
+  min-width: 260px;           /* garante largura mínima */
+  text-align: center;         /* centraliza o texto */
+  margin-right: 40px;         /* distância fixa entre itens */
+
   will-change: transform;
 }
+
 .ticker__item.is-glow{
   box-shadow: 0 0 18px rgba(0,191,255,.20), 0 0 28px rgba(123,47,247,.15);
 }
@@ -356,4 +363,5 @@ body{
 }
 .footer__left{ color: var(--muted); font-weight: 800; }
 .footer__right{ color: var(--muted); font-weight: 800; }
+
 
