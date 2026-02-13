@@ -427,12 +427,13 @@ window.addEventListener("keydown", (e) => {
 
   try{
     await loadCSV();
-    setMode("champ");
+    setMode("sheet");
     startAuto();
   }catch(err){
     elStatusLastUpdate.textContent = `Erro: ${err.message}`;
     console.error(err);
   }
 })();
+
 
 
