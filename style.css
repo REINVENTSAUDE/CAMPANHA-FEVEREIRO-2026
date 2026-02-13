@@ -153,13 +153,14 @@ body{
   border: 1px solid rgba(255,255,255,.12);
 }
 .dicechip .face{
-  font-size: 20px;
-  width: 40px; height: 40px;
-  display:grid; place-items:center;
-  border-radius: 6px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.12);
-  font-weight: 900;
+  display:grid;
+  place-items:center;
+
+  font-size: 34px;     /* aumenta o dado de verdade */
+  line-height: 1;
+
+  background: transparent;  /* remove caixinha */
+  border: none;             /* remove borda */
 }
 .dicechip .pts{
   font-weight: 900;
@@ -374,6 +375,7 @@ body{
 }
 .footer__left{ color: var(--muted); font-weight: 800; }
 .footer__right{ color: var(--muted); font-weight: 800; }
+
 
 
 
