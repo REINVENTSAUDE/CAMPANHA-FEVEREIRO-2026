@@ -335,3 +335,19 @@ body{
   color: var(--muted);
   font-weight: 800;
 }
+/* Controles de giro */
+.giro-controls{
+  display:flex;
+  gap: 10px;
+  justify-content:center;
+  margin-top: 6px;
+}
+
+.giro-btn{
+  width: 60px;
+  height: 46px;
+  font-size: 20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
