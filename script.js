@@ -36,7 +36,7 @@ let page = 0;
 let paused = false;
 let autoTimer = null;
 
-let mode = "champ";           // "champ" | "sheet"
+let mode = "sheet";           // "champ" | "sheet"
 let giroOffset = 0;           // janela de giros na planilha
 
 /* =========================
@@ -434,4 +434,5 @@ window.addEventListener("keydown", (e) => {
     console.error(err);
   }
 })();
+
 
