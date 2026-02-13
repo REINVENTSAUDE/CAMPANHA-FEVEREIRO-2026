@@ -34,10 +34,6 @@
       <div class="dicechip"><span class="face">⚄</span><span class="pts">7</span></div>
       <div class="dicechip"><span class="face">⚅</span><span class="pts">6</span></div>
     </div>
-    <div class="dicebar__legend">
-      <span class="legend legend--pink">Pendente</span>
-      <span class="legend legend--blue">Registrado</span>
-    </div>
   </section>
 
   <!-- CONTEÚDO -->
@@ -46,9 +42,14 @@
     <section id="viewSheet" class="view--active" aria-label="Tabela planilha">
       <div class="sheetTop">
         <div class="sheetTop__left">
-          <div class="sheetTitle">Controle (Vidas e Giros)</div>
-          <div class="sheetHint">Rosa = pendente / Azul = giro registrado</div>
-        </div>
+  <div class="sheetTitle">Controle (Vidas e Giros)</div>
+  <div class="sheetHint">Rosa = pendente / Azul = giro registrado</div>
+
+  <div class="legend-group">
+    <span class="legend legend--pink">Pendente</span>
+    <span class="legend legend--blue">Registrado</span>
+  </div>
+</div>
 
         <div class="sheetTop__right">
   <div class="status" id="statusGiro">Giros: 1–10</div>
@@ -74,4 +75,5 @@
   <script src="./script.js"></script>
 </body>
 </html>
+
 
