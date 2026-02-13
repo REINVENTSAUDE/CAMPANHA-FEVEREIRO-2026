@@ -170,7 +170,7 @@ body{
 .dicechip .face{
   display:grid;
   place-items:center;
-  font-size: 34px;     /* tamanho do dado (pontinhos) */
+  font-size: 44px;     /* tamanho do dado (pontinhos) */
   line-height: 1;
   background: transparent;
   border: none;
@@ -351,3 +351,4 @@ body{
   align-items:center;
   justify-content:center;
 }
+
