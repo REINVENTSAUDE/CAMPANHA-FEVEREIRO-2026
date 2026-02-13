@@ -153,6 +153,7 @@ body{
   border: 1px solid rgba(255,255,255,.12);
 }
 .dicechip .face{
+  font-size: 20px;
   width: 28px; height: 28px;
   display:grid; place-items:center;
   border-radius: 6px;
@@ -373,6 +374,7 @@ body{
 }
 .footer__left{ color: var(--muted); font-weight: 800; }
 .footer__right{ color: var(--muted); font-weight: 800; }
+
 
 
 
