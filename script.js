@@ -3,16 +3,16 @@
 ========================= */
 const CSV_FILE = "./DADOS-CAMPANHA.csv";
 
-const AUTO_SECONDS = 10;
-const PAGE_SIZE = 10;
+// janela de giros mostrada na TV
+const GIRO_WINDOW = 10;
 
-// D:AN = 36 colunas de giro (D até AN)
-const GIRO_WINDOW = 10;   // quantas colunas de giro por vez na TV
-const GIRO_START_INDEX_EXCEL = 2;   // D = índice 3 (A=0,B=1,C=2,D=3)
-const GIRO_END_INDEX_EXCEL = 38;    // AN = índice 39
-const TOTAL_INDEX_EXCEL = 39;       // AO = índice 40
-const NAME_INDEX_EXCEL = 0;         // B = índice 1
-const VIDAS_INDEX_EXCEL = 1;        // C = índice 2
+// IMPORTANTE: seus índices estão ajustados para CSV SEM coluna A
+// (nome na 1ª coluna do CSV)
+const NAME_INDEX = 0;        // vendedor
+const VIDAS_INDEX = 1;       // vidas
+const GIRO_START_INDEX = 2;  // início dos giros
+const GIRO_END_INDEX = 38;   // fim dos giros
+const TOTAL_INDEX = 39;      // total
 
 // prêmios (texto direto)
 const PRIZES = [
@@ -30,21 +30,15 @@ const PRIZES = [
 /* =========================
    State
 ========================= */
-let rows = [];                // dados brutos
-let champSorted = [];         // ordenado por AO desc
-let page = 0;
-let paused = false;
-let autoTimer = null;
-
-let mode = "sheet";           // "champ" | "sheet"
-let giroOffset = 0;           // janela de giros na planilha
+let rows = [];          // dados brutos
+let sorted = [];        // ordenado por total desc
+let giroOffset = 0;     // janela de giros (0..)
 
 /* =========================
    Helpers
 ========================= */
 function nowBR(){
-  const d = new Date();
-  return d.toLocaleString("pt-BR");
+  return new Date().toLocaleString("pt-BR");
 }
 
 function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
@@ -62,9 +56,10 @@ function isGiroValue(v){
 }
 
 function csvParse(text){
-  // parser robusto (aceita aspas)
+  // aceita vírgula ou ponto-e-vírgula, com aspas
   const lines = text.replace(/\r/g, "").split("\n").filter(l => l.trim().length);
   const out = [];
+
   for (const line of lines){
     const row = [];
     let cur = "";
@@ -72,18 +67,14 @@ function csvParse(text){
 
     for (let i=0; i<line.length; i++){
       const ch = line[i];
-      if (ch === '"' ){
-        // escape ""
+
+      if (ch === '"'){
         if (inQuotes && line[i+1] === '"'){
           cur += '"'; i++;
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (ch === "," && !inQuotes){
-        row.push(cur);
-        cur = "";
-      } else if (ch === ";" && !inQuotes){
-        // se vier separado por ; (muito comum no Excel BR)
+      } else if ((ch === "," || ch === ";") && !inQuotes){
         row.push(cur);
         cur = "";
       } else {
@@ -97,8 +88,7 @@ function csvParse(text){
 }
 
 function ensureEnoughCols(r){
-  // garante tamanho mínimo
-  const minCols = TOTAL_INDEX_EXCEL + 1;
+  const minCols = TOTAL_INDEX + 1;
   if (r.length >= minCols) return r;
   const copy = r.slice();
   while (copy.length < minCols) copy.push("");
@@ -106,39 +96,25 @@ function ensureEnoughCols(r){
 }
 
 /* =========================
-   UI
+   UI refs
 ========================= */
 const elPrizeTrack = document.getElementById("prizeTrack");
-
-const elViewChamp = document.getElementById("viewChamp");
-const elViewSheet = document.getElementById("viewSheet");
-
-const elChampList = document.getElementById("champList");
 const elSheetTable = document.getElementById("sheetTable");
-
-const elStatusPage = document.getElementById("statusPage");
-const elStatusAuto = document.getElementById("statusAuto");
 const elStatusLastUpdate = document.getElementById("statusLastUpdate");
-
-const btnModeChamp = document.getElementById("btnModeChamp");
-const btnModeSheet = document.getElementById("btnModeSheet");
-
-const btnPrev = document.getElementById("btnPrev");
-const btnNext = document.getElementById("btnNext");
-const btnPause = document.getElementById("btnPause");
+const statusGiro = document.getElementById("statusGiro");
 
 const btnGiroPrev = document.getElementById("btnGiroPrev");
 const btnGiroNext = document.getElementById("btnGiroNext");
-const statusGiro = document.getElementById("statusGiro");
 
 /* =========================
    Prize ticker
 ========================= */
 function startPrizeTicker(){
-  // um item por vez cruzando a faixa
   let idx = 0;
 
   function spawn(){
+    if (!elPrizeTrack) return;
+
     const item = document.createElement("div");
     item.className = "ticker__item";
     item.textContent = PRIZES[idx % PRIZES.length];
@@ -146,30 +122,22 @@ function startPrizeTicker(){
 
     elPrizeTrack.appendChild(item);
 
-    // medidas
     const trackW = elPrizeTrack.clientWidth;
     const itemW = item.getBoundingClientRect().width;
 
-    // velocidade: baseado no tamanho (TV legível)
-    const duration = clamp((trackW + itemW) / 120, 6, 12); // 6-12s
+    const duration = clamp((trackW + itemW) / 120, 6, 12);
 
-    // animação via Web Animations
     const anim = item.animate([
       { transform: `translate(${0}px, -50%)`, offset: 0 },
       { transform: `translate(${- (trackW + itemW)}px, -50%)`, offset: 1 }
-    ], {
-      duration: duration * 1000,
-      easing: "linear"
-    });
+    ], { duration: duration * 1000, easing: "linear" });
 
-    // glow quando passa pelo meio (simples: liga no início e desliga após ~40%)
     item.classList.add("is-glow");
     setTimeout(() => item.classList.remove("is-glow"), (duration * 1000) * 0.45);
 
     anim.onfinish = () => item.remove();
   }
 
-  // dispara sempre, com intervalo fixo
   spawn();
   setInterval(spawn, 2200);
 }
@@ -185,87 +153,44 @@ async function loadCSV(){
   const parsed = csvParse(text);
   if (!parsed.length) throw new Error("CSV vazio.");
 
-  // Se a primeira linha parecer cabeçalho (contém letras), removemos do dataset
-  // Mas como o seu mapeamento é por coluna, isso só evita incluir a linha de título como vendedor.
+  // tenta detectar cabeçalho (se houver)
   const first = parsed[0].join(" ").toUpperCase();
-  const looksHeader = first.includes("VENDEDOR") || first.includes("NOME") || first.includes("TOTAL") || first.includes("VIDA") || first.includes("FEVEREIRO");
+  const looksHeader =
+    first.includes("VENDEDOR") ||
+    first.includes("NOME") ||
+    first.includes("TOTAL") ||
+    first.includes("VIDA") ||
+    first.includes("VIDAS");
+
   const dataLines = looksHeader ? parsed.slice(1) : parsed;
 
   rows = dataLines
     .map(ensureEnoughCols)
-    .filter(r => String(r[NAME_INDEX_EXCEL] || "").trim().length > 0);
+    .filter(r => String(r[NAME_INDEX] || "").trim().length > 0);
 
-  // ranking ordenado por AO
-  champSorted = rows.slice().sort((a,b) => toInt(b[TOTAL_INDEX_EXCEL]) - toInt(a[TOTAL_INDEX_EXCEL]));
+  sorted = rows.slice().sort((a,b) => toInt(b[TOTAL_INDEX]) - toInt(a[TOTAL_INDEX]));
 
   elStatusLastUpdate.textContent = `Dados carregados: ${nowBR()}`;
 }
 
 /* =========================
-   Championship render
-========================= */
-function pageCount(){
-  return Math.max(1, Math.ceil(champSorted.length / PAGE_SIZE));
-}
-
-function renderChamp(){
-  elChampList.innerHTML = "";
-
-  const totalPages = pageCount();
-  page = clamp(page, 0, totalPages - 1);
-
-  const start = page * PAGE_SIZE;
-  const slice = champSorted.slice(start, start + PAGE_SIZE);
-
-  slice.forEach((r, i) => {
-    const pos = start + i + 1;
-
-    const row = document.createElement("div");
-    row.className = "row";
-
-    const badge = document.createElement("div");
-    badge.className = "badge";
-    badge.textContent = `${pos}º`;
-
-    if (pos === 1) badge.classList.add("badge--gold");
-    if (pos === 2) badge.classList.add("badge--silver");
-    if (pos === 3) badge.classList.add("badge--bronze");
-
-    const name = document.createElement("div");
-    name.className = "name";
-    name.textContent = String(r[NAME_INDEX_EXCEL] || "").toUpperCase();
-
-    const points = document.createElement("div");
-    points.className = "points";
-    points.textContent = `${toInt(r[TOTAL_INDEX_EXCEL])}`;
-
-    row.appendChild(badge);
-    row.appendChild(name);
-    row.appendChild(points);
-    elChampList.appendChild(row);
-  });
-
-  elStatusPage.textContent = `Página ${page + 1}/${totalPages}`;
-}
-
-/* =========================
-   Sheet render (planilha)
+   Sheet render
 ========================= */
 function girosTotalCols(){
-  return (GIRO_END_INDEX_EXCEL - GIRO_START_INDEX_EXCEL + 1);
+  return (GIRO_END_INDEX - GIRO_START_INDEX + 1);
 }
 
 function renderSheet(){
-  // janela de giros (0..)
+  if (!elSheetTable) return;
+
   const total = girosTotalCols();
   giroOffset = clamp(giroOffset, 0, Math.max(0, total - GIRO_WINDOW));
 
-  const gStart = GIRO_START_INDEX_EXCEL + giroOffset;
+  const gStart = GIRO_START_INDEX + giroOffset;
   const gEnd = gStart + GIRO_WINDOW - 1;
 
-  statusGiro.textContent = `Giros: ${giroOffset + 1}–${giroOffset + GIRO_WINDOW}`;
+  if (statusGiro) statusGiro.textContent = `Giros: ${giroOffset + 1}–${giroOffset + GIRO_WINDOW}`;
 
-  // Tabela
   const thead = `
     <thead>
       <tr>
@@ -278,23 +203,21 @@ function renderSheet(){
     </thead>
   `;
 
-  const bodyRows = champSorted.map((r, idx) => {
-    const nome = String(r[NAME_INDEX_EXCEL] || "").toUpperCase();
-    const vidas = toInt(r[VIDAS_INDEX_EXCEL]);
+  const bodyRows = sorted.map((r, idx) => {
+    const nome = String(r[NAME_INDEX] || "").toUpperCase();
+    const vidas = toInt(r[VIDAS_INDEX]);
 
-    // conta giros já registrados (número 6..11) em TODO D:AN
+    // quantos giros já registrados (6..11) no conjunto todo
     let done = 0;
-    for (let c = GIRO_START_INDEX_EXCEL; c <= GIRO_END_INDEX_EXCEL; c++){
+    for (let c = GIRO_START_INDEX; c <= GIRO_END_INDEX; c++){
       if (isGiroValue(r[c])) done++;
     }
 
     const pending = Math.max(0, vidas - done);
 
-    // Para cada coluna na janela: se tem número -> azul
-    // Se vazio e ainda existe pendência e esta célula é a "próxima" (da esquerda p/ direita) -> rosa
-    // Implementação: identificar as posições vazias (na faixa inteira D:AN) e marcar as primeiras "pending" como rosas.
+    // identifica vazios e pinta os primeiros "pending" como rosa
     const emptyIndexes = [];
-    for (let c = GIRO_START_INDEX_EXCEL; c <= GIRO_END_INDEX_EXCEL; c++){
+    for (let c = GIRO_START_INDEX; c <= GIRO_END_INDEX; c++){
       const val = (r[c] ?? "").toString().trim();
       if (!isGiroValue(val) && val === "") emptyIndexes.push(c);
     }
@@ -303,23 +226,17 @@ function renderSheet(){
     const giroTds = [];
     for (let c = gStart; c <= gEnd; c++){
       const raw = (r[c] ?? "").toString().trim();
-      let cls = "";
-      let txt = raw;
 
       if (isGiroValue(raw)) {
-        cls = "cell--blue";
-        txt = String(toInt(raw));
+        giroTds.push(`<td class="cell--blue" style="text-align:center">${toInt(raw)}</td>`);
       } else if (pinkSet.has(c)) {
-        cls = "cell--pink";
-        txt = ""; // fica rosa vazio (alerta)
+        giroTds.push(`<td class="cell--pink" style="text-align:center"></td>`);
       } else {
-        txt = ""; // mantém vazio “normal”
+        giroTds.push(`<td style="text-align:center"></td>`);
       }
-
-      giroTds.push(`<td class="${cls}" style="text-align:center">${txt}</td>`);
     }
 
-    const totalPts = toInt(r[TOTAL_INDEX_EXCEL]);
+    const totalPts = toInt(r[TOTAL_INDEX]);
 
     return `
       <tr>
@@ -336,87 +253,34 @@ function renderSheet(){
 }
 
 /* =========================
-   Auto paging
-========================= */
-function startAuto(){
-  stopAuto();
-  autoTimer = setInterval(() => {
-    if (paused) return;
-    if (mode !== "champ") return;
-    page = (page + 1) % pageCount();
-    renderChamp();
-  }, AUTO_SECONDS * 1000);
-  elStatusAuto.textContent = `Auto: ${AUTO_SECONDS}s`;
-}
-
-function stopAuto(){
-  if (autoTimer) clearInterval(autoTimer);
-  autoTimer = null;
-}
-
-/* =========================
-   Mode
-========================= */
-function setMode(next){
-  mode = next;
-
-  if (mode === "champ"){
-    elViewChamp.classList.add("view--active");
-    elViewSheet.classList.remove("view--active");
-
-    btnModeChamp.classList.add("btn--primary");
-    btnModeSheet.classList.remove("btn--primary");
-
-    renderChamp();
-  } else {
-    elViewSheet.classList.add("view--active");
-    elViewChamp.classList.remove("view--active");
-
-    btnModeSheet.classList.add("btn--primary");
-    btnModeChamp.classList.remove("btn--primary");
-
-    renderSheet();
-  }
-}
-
-/* =========================
    Events
 ========================= */
-btnModeChamp.addEventListener("click", () => setMode("champ"));
-btnModeSheet.addEventListener("click", () => setMode("sheet"));
+if (btnGiroPrev){
+  btnGiroPrev.addEventListener("click", () => {
+    giroOffset = Math.max(0, giroOffset - GIRO_WINDOW);
+    renderSheet();
+  });
+}
 
-btnPrev.addEventListener("click", () => {
-  page = (page - 1 + pageCount()) % pageCount();
-  renderChamp();
-});
+if (btnGiroNext){
+  btnGiroNext.addEventListener("click", () => {
+    const total = girosTotalCols();
+    giroOffset = Math.min(Math.max(0, total - GIRO_WINDOW), giroOffset + GIRO_WINDOW);
+    renderSheet();
+  });
+}
 
-btnNext.addEventListener("click", () => {
-  page = (page + 1) % pageCount();
-  renderChamp();
-});
-
-btnPause.addEventListener("click", () => {
-  paused = !paused;
-  btnPause.textContent = paused ? "▶ Retomar" : "⏸ Pausar";
-});
-
-btnGiroPrev.addEventListener("click", () => {
-  giroOffset = Math.max(0, giroOffset - GIRO_WINDOW);
-  renderSheet();
-});
-btnGiroNext.addEventListener("click", () => {
-  const total = girosTotalCols();
-  giroOffset = Math.min(Math.max(0, total - GIRO_WINDOW), giroOffset + GIRO_WINDOW);
-  renderSheet();
-});
-
-// Teclas para TV (opcional)
+// Teclas (TV)
 window.addEventListener("keydown", (e) => {
-  if (e.key === " "){ e.preventDefault(); paused = !paused; btnPause.textContent = paused ? "▶ Retomar" : "⏸ Pausar"; }
-  if (e.key === "ArrowLeft"){ page = (page - 1 + pageCount()) % pageCount(); renderChamp(); }
-  if (e.key === "ArrowRight"){ page = (page + 1) % pageCount(); renderChamp(); }
-  if (e.key.toLowerCase() === "p"){ setMode("sheet"); }
-  if (e.key.toLowerCase() === "c"){ setMode("champ"); }
+  if (e.key === "ArrowLeft"){
+    giroOffset = Math.max(0, giroOffset - GIRO_WINDOW);
+    renderSheet();
+  }
+  if (e.key === "ArrowRight"){
+    const total = girosTotalCols();
+    giroOffset = Math.min(Math.max(0, total - GIRO_WINDOW), giroOffset + GIRO_WINDOW);
+    renderSheet();
+  }
 });
 
 /* =========================
@@ -427,13 +291,9 @@ window.addEventListener("keydown", (e) => {
 
   try{
     await loadCSV();
-    setMode("sheet");
-    startAuto();
+    renderSheet();
   }catch(err){
     elStatusLastUpdate.textContent = `Erro: ${err.message}`;
     console.error(err);
   }
 })();
-
-
-
