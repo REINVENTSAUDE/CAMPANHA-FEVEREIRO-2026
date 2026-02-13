@@ -198,8 +198,19 @@ body{
   background: rgba(0,0,0,.25);
 }
 
-.legend--pink{ color:#fff; box-shadow: 0 0 12px rgba(255,79,163,.20); }
-.legend--blue{ color:#fff; box-shadow: 0 0 12px rgba(23,119,255,.22); }
+.legend--pink{
+  background: rgba(255,79,163,.85);
+  border-color: rgba(255,79,163,.95);
+  color:#fff;
+  box-shadow: 0 0 12px rgba(255,79,163,.35);
+}
+
+.legend--blue{
+  background: rgba(23,119,255,.85);
+  border-color: rgba(23,119,255,.95);
+  color:#fff;
+  box-shadow: 0 0 12px rgba(23,119,255,.35);
+}
 
 /* =========================
    MAIN
@@ -353,8 +364,9 @@ body{
 }
 .legend-group{
   display:flex;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 16px;
   flex-wrap: wrap;
 }
+
 
