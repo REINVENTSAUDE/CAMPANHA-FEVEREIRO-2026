@@ -1,7 +1,7 @@
 /* =========================
    Config
 ========================= */
-const CSV_FILE = "./DADOS-CAMPANHA.csv";
+const CSV_FILE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY5ukrD3bTeX9vuhrxRL5efBcpaSinSeZAobM19JPY3Z73-pebD1qLTSQrElmHiizt8vVWrcSRItmi/pub?gid=0&single=true&output=csv";
 
 // janela de giros mostrada na TV
 const GIRO_WINDOW = 10;
@@ -297,3 +297,4 @@ window.addEventListener("keydown", (e) => {
     console.error(err);
   }
 })();
+
