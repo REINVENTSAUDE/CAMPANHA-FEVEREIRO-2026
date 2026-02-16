@@ -51,8 +51,10 @@ function toInt(v){
 }
 
 function isGiroValue(v){
-  const n = toInt(v);
-  return n >= 6 && n <= 11;
+  const s = String(v ?? "").trim();
+  if (s === "") return false;
+  const n = toInt(s);
+  return Number.isFinite(n);   // aceita 30, 18, 6, 11, etc.
 }
 
 function csvParse(text){
@@ -297,4 +299,5 @@ window.addEventListener("keydown", (e) => {
     console.error(err);
   }
 })();
+
 
