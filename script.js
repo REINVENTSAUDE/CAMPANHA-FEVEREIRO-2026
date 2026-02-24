@@ -105,6 +105,8 @@ const elSheetTable = document.getElementById("sheetTable");
 const elStatusLastUpdate = document.getElementById("statusLastUpdate");
 const statusGiro = document.getElementById("statusGiro");
 
+const btnRefresh = document.getElementById("btnRefresh");
+
 const btnGiroPrev = document.getElementById("btnGiroPrev");
 const btnGiroNext = document.getElementById("btnGiroNext");
 
@@ -174,7 +176,12 @@ async function loadCSV(){
 
   elStatusLastUpdate.textContent = `Dados carregados: ${nowBR()}`;
 }
-
+async function refreshNow(){
+  elStatusLastUpdate.textContent = "Atualizando…";
+  await loadCSV();
+  renderSheet();
+  elStatusLastUpdate.textContent = `Atualizado: ${nowBR()}`;
+}
 /* =========================
    Sheet render
 ========================= */
@@ -263,7 +270,14 @@ if (btnGiroPrev){
     renderSheet();
   });
 }
-
+if (btnRefresh){
+  btnRefresh.addEventListener("click", () => {
+    refreshNow().catch(err => {
+      elStatusLastUpdate.textContent = `Erro: ${err.message}`;
+      console.error(err);
+    });
+  });
+}
 if (btnGiroNext){
   btnGiroNext.addEventListener("click", () => {
     const total = girosTotalCols();
@@ -299,5 +313,6 @@ window.addEventListener("keydown", (e) => {
     console.error(err);
   }
 })();
+
 
 
