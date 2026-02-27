@@ -12,7 +12,7 @@ const NAME_INDEX = 0;        // vendedor
 const VIDAS_INDEX = 1;       // vidas
 const GIRO_START_INDEX = 2;  // início dos giros
 const GIRO_END_INDEX = 38;   // fim dos giros
-const TOTAL_INDEX = 39;      // total
+const TOTAL_INDEX = 43;      // total
 
 // prêmios (texto direto)
 const PRIZES = [
@@ -313,6 +313,7 @@ window.addEventListener("keydown", (e) => {
     console.error(err);
   }
 })();
+
 
 
 
